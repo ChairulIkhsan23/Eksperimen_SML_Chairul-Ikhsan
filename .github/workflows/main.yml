@@ -1,1 +1,108 @@
+name: Automate Preprocessing Pipeline
 
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "ulasan-aplikasi-dana_raw/**"
+      - "preprocessing/automate_Chairul-Ikhsan.py"
+      - "preprocessing/lexicon/**"
+      - ".github/workflows/main.yml"
+  workflow_dispatch:
+
+jobs:
+  preprocessing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Set up job
+        run: |
+          echo "Preprocessing Pipeline - Chairul Ikhsan"
+          echo "Trigger  : ${{ github.event_name }}"
+          echo "Branch   : ${{ github.ref_name }}"
+          echo "Commit   : ${{ github.sha }}"
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.7'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r preprocessing/requirements.txt
+
+      - name: Verify dataset files
+        run: |
+          echo "Memeriksa file dataset..."
+          python -c "
+          import os, sys
+          files = [
+              'ulasan-aplikasi-dana_raw/ulasan-aplikasi-dana.csv',
+              'preprocessing/lexicon/lexicon_dana.csv',
+          ]
+          all_ok = True
+          for f in files:
+              if os.path.exists(f):
+                  size = os.path.getsize(f)
+                  print(f'  File ditemukan: {f} ({size:,} bytes)')
+              else:
+                  print(f'  File tidak ditemukan: {f}')
+                  all_ok = False
+          if not all_ok:
+              sys.exit(1)
+          print('Semua file tersedia')
+          "
+
+      - name: Run Preprocessing
+        working-directory: preprocessing
+        run: |
+          echo "Memulai preprocessing dataset..."
+          python automate_Chairul-Ikhsan.py
+          echo "Preprocessing selesai"
+
+      - name: Validate Output
+        working-directory: preprocessing
+        run: |
+          python -c "
+          import os, pandas as pd
+
+          out = 'ulasan-aplikasi-dana_preprocessing'
+          files = ['X_train.csv', 'X_val.csv', 'X_test.csv', 'y_train.csv', 'y_val.csv', 'y_test.csv']
+
+          print('Validasi output:')
+          for f in files:
+              path = os.path.join(out, f)
+              assert os.path.exists(path), f'Tidak ada: {path}'
+              print(f'  File ditemukan: {f}')
+
+          train_x = pd.read_csv(f'{out}/X_train.csv')
+          train_y = pd.read_csv(f'{out}/y_train.csv')
+          assert len(train_x) > 0
+          assert len(train_y) > 0
+          print(f'  Train size: {len(train_x)} baris')
+          print('Semua validasi berhasil')
+          "
+
+      - name: Upload Preprocessing Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: preprocessing-results
+          path: preprocessing/ulasan-aplikasi-dana_preprocessing/
+          retention-days: 30
+
+      - name: Complete job
+        if: always()
+        run: |
+          echo "SUMMARY"
+          echo "Status    : ${{ job.status }}"
+          echo "Timestamp : $(date +'%Y-%m-%d %H:%M:%S')"
+          if [ -d "preprocessing/ulasan-aplikasi-dana_preprocessing" ]; then
+            echo "Output files:"
+            ls -lh preprocessing/ulasan-aplikasi-dana_preprocessing/
+          fi
