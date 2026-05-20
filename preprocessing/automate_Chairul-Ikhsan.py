@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import re
 import csv
+import json
+from datetime import datetime
 import requests
 from io import StringIO
 from pathlib import Path
@@ -546,6 +548,62 @@ def preprocess_dataset(input_path, output_dir=None, simpan_visualisasi=True):
     print('  Tersimpan: X_train.csv, X_val.csv, X_test.csv')
     print('  Tersimpan: y_train.csv, y_val.csv, y_test.csv')
 
+    # Langkah 12: Membuat metadata.json
+    print('\nLangkah 12: Membuat metadata.json')
+    sentiment_dist = df_clean['polarity'].value_counts().to_dict()
+    
+    metadata = {
+        'timestamp': datetime.now().isoformat(),
+        'preprocessing_info': {
+            'original_rows': int(df.shape[0]),
+            'original_columns': int(df.shape[1]),
+            'final_rows': int(df_clean.shape[0]),
+            'final_columns': int(df_clean.shape[1]),
+            'rows_retained_percentage': float((df_clean.shape[0] / df.shape[0] * 100))
+        },
+        'data_split': {
+            'train_samples': int(len(X_train)),
+            'train_percentage': float((len(X_train) / len(X) * 100)),
+            'validation_samples': int(len(X_val)),
+            'validation_percentage': float((len(X_val) / len(X) * 100)),
+            'test_samples': int(len(X_test)),
+            'test_percentage': float((len(X_test) / len(X) * 100)),
+            'random_state': 42,
+            'stratify': True
+        },
+        'sentiment_distribution': {
+            'positive': int(sentiment_dist.get('positive', 0)),
+            'negative': int(sentiment_dist.get('negative', 0)),
+            'neutral': int(sentiment_dist.get('neutral', 0))
+        },
+        'preprocessing_steps': [
+            'Tangani nilai kosong (hapus isi kosong)',
+            'Tangani duplikat (hapus isi duplikat)',
+            'Pembersihan teks (huruf kecil, hapus URL, mentions, karakter khusus)',
+            'Tokenisasi (pisahkan menjadi kata)',
+            'Penghapusan stopwords (stopwords Indonesia, panjang > 1)',
+            'Stemming (stemmer Sastrawi)',
+            'Penggabungan token (buat teks akhir)',
+            'Pelabelan sentimen (lexicon-based)',
+            'Pemisahan data (70% train, 15% val, 15% test dengan stratifikasi)'
+        ],
+        'output_files': [
+            'data_preprocessed.csv',
+            'X_train.csv',
+            'X_val.csv',
+            'X_test.csv',
+            'y_train.csv',
+            'y_val.csv',
+            'y_test.csv',
+            'metadata.json'
+        ]
+    }
+    
+    metadata_path = output_dir / 'metadata.json'
+    with open(metadata_path, 'w', encoding='utf-8') as f:
+        json.dump(metadata, f, indent=2, ensure_ascii=False)
+    print(f'  Tersimpan: metadata.json')
+
     results = {
         'df_clean': df_clean,
         'X_train': X_train,
@@ -560,6 +618,7 @@ def preprocess_dataset(input_path, output_dir=None, simpan_visualisasi=True):
         'train_size': len(X_train),
         'val_size': len(X_val),
         'test_size': len(X_test),
+        'metadata': metadata
     }
 
     return results
