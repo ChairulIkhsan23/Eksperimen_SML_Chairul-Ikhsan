@@ -17,15 +17,16 @@ Proyek ini menyediakan pipeline preprocessing lengkap untuk:
 
 ```
 preprocessing/
-├── Eksperimen_Chairul-Ikhsan.ipynb       (Notebook interaktif)
-├── automate_Chairul-Ikhsan.py            (Script otomatis)
-├── ulasan-aplikasi-dana_preprocessing/   (Output folder)
+├── Eksperimen_Chairul-Ikhsan.ipynb           (Notebook interaktif)
+├── automate_Chairul-Ikhsan.py                (Script otomatis)
+├── requirements.txt                          (Dependencies)
+├── ulasan-aplikasi-dana_preprocessing/       (Output folder)
 └── README.md
-```
 
-Dataset raw harus ditempatkan di:
-```
-../ulasan-aplikasi-dana_raw/ulasan-aplikasi-dana.csv
+../
+├── ulasan-aplikasi-dana_raw/
+│   └── ulasan-aplikasi-dana.csv              (Dataset raw)
+└── README.md                                 (Root dokumentasi)
 ```
 
 ## Requirements
@@ -91,13 +92,15 @@ Setelah preprocessing selesai, folder `ulasan-aplikasi-dana_preprocessing/` akan
 
 ## Tahap Preprocessing
 
-1. Tangani nilai kosong
-2. Hapus duplikat
-3. Pembersihan teks
-4. Tokenisasi
-5. Penghapusan stopwords Indonesia
-6. Stemming
-7. Penggabungan token
-8. Analisis sentimen
-9. Pemisahan data dan export
+1. **Memuat dataset** - Membaca file CSV dengan handling untuk bad lines
+2. **Menangani nilai kosong** - Menghapus baris dengan kolom 'content' kosong
+3. **Menangani duplikat** - Menghapus duplikat berdasarkan kolom 'content'
+4. **Pembersihan teks** - Huruf kecil, hapus URL, mentions, hashtag, karakter khusus
+5. **Tokenisasi** - Memisahkan teks menjadi token kata menggunakan NLTK
+6. **Penghapusan stopwords** - Menghapus stopwords bahasa Indonesia, panjang token > 1
+7. **Stemming** - Menerapkan stemming dengan Sastrawi untuk normalisasi kata
+8. **Penggabungan token** - Menggabungkan token yang telah diproses menjadi string
+9. **Analisis sentimen** - Pelabelan sentimen berbasis lexicon (positive/negative/neutral)
+10. **Pemisahan data** - Split train/validasi/test (70/15/15) dengan stratifikasi
+11. **Export hasil** - Menyimpan dalam format CSV
 
