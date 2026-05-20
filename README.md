@@ -11,7 +11,7 @@ Proyek ini menyediakan pipeline preprocessing lengkap untuk:
 - Stemming menggunakan Sastrawi
 - Analisis sentimen berbasis lexicon (positif/negatif/netral)
 - Pemisahan data train/validasi/test (70/15/15)
-- Export hasil dalam format CSV dan Parquet
+- Export hasil dalam format CSV
 
 ## Struktur Folder
 
