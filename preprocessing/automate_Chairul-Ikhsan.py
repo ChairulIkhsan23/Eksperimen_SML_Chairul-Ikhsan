@@ -96,17 +96,31 @@ def stem_tokens(tokens, stemmer):
 
 
 # Fungsi Pelabelan Sentimen dengan Lexicon
-def load_lexicons_from_github():
+def load_lexicons():
     """
-    Memuat kamus kata positif dan negatif bahasa Indonesia dari repository GitHub.
+    Memuat kamus kata positif dan negatif dari file lokal dan GitHub.
 
     Returns:
         tuple: (lexicon_positive dict, lexicon_negative dict)
     """
     lexicon_positive = dict()
-    response = requests.get(
-        'https://raw.githubusercontent.com/angelmetanosaa/dataset/main/lexicon_positive.csv'
-    )
+    lexicon_negative = dict()
+
+    # Load dari file lokal
+    local_path = Path('lexicon/lexicon_dana.csv')
+    if local_path.exists():
+        df_lexicon = pd.read_csv(local_path)
+        for _, row in df_lexicon.iterrows():
+            if row['sentimen'] == 'positif':
+                lexicon_positive[row['kata']] = 1
+            elif row['sentimen'] == 'negatif':
+                lexicon_negative[row['kata']] = -1
+        print(f'Lexicon lokal - positif: {len(lexicon_positive)}, negatif: {len(lexicon_negative)}')
+    else:
+        print('File lokal tidak ditemukan')
+
+    # Download dari GitHub
+    response = requests.get('https://raw.githubusercontent.com/angelmetanosaa/dataset/main/lexicon_positive.csv')
     if response.status_code == 200:
         reader = csv.reader(StringIO(response.text), delimiter=',')
         for row in reader:
@@ -114,10 +128,7 @@ def load_lexicons_from_github():
     else:
         print('Gagal mengunduh kamus kata positif dari GitHub')
 
-    lexicon_negative = dict()
-    response = requests.get(
-        'https://raw.githubusercontent.com/angelmetanosaa/dataset/main/lexicon_negative.csv'
-    )
+    response = requests.get('https://raw.githubusercontent.com/angelmetanosaa/dataset/main/lexicon_negative.csv')
     if response.status_code == 200:
         reader = csv.reader(StringIO(response.text), delimiter=',')
         for row in reader:
