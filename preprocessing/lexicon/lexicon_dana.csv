@@ -1,0 +1,245 @@
+kata,sentimen
+bagus,positif
+mantap,positif
+suka,positif
+senang,positif
+hebat,positif
+keren,positif
+terbaik,positif
+sempurna,positif
+mudah,positif
+cepat,positif
+praktis,positif
+aman,positif
+ok,positif
+baik,positif
+lancar,positif
+stabil,positif
+ringan,positif
+efisien,positif
+nyaman,positif
+terpercaya,positif
+handal,positif
+responsif,positif
+rekomendasi,positif
+terbantu,positif
+transaksi berhasil,positif
+bayar berhasil,positif
+topup berhasil,positif
+transfer berhasil,positif
+promo,positif
+cashback,positif
+diskon,positif
+voucher,positif
+gratis,positif
+poin,positif
+reward,positif
+bantuan cepat,positif
+cs baik,positif
+solusi tepat,positif
+aplikasi bermanfaat,positif
+top,positif
+jos,positif
+gacor,positif
+wow,positif
+keren abis,positif
+luar biasa,positif
+istimewa,positif
+terbaik sejauh ini,positif
+cocok,positif
+recomended,positif
+recommended,positif
+bantu banget,positif
+sangat membantu,positif
+memudahkan,positif
+cepat banget,positif
+sesaat,positif
+real time,positif
+update cepat,positif
+fitur lengkap,positif
+lengkap,positif
+inovatif,positif
+modern,positif
+simple,positif
+user friendly,positif
+mudah dipahami,positif
+mudah digunakan,positif
+ringan di hp,positif
+tidak berat,positif
+hemat kuota,positif
+hemat baterai,positif
+ringan banget,positif
+transaksi lancar,positif
+proses cepat,positif
+instan,positif
+tanpa hambatan,positif
+sukses selalu,positif
+biaya murah,positif
+admin kecil,positif
+tanpa admin,positif
+bebas biaya,positif
+gratis transfer,positif
+hadiah,positif
+bonus,positif
+undian,positif
+menang,positif
+dapat poin,positif
+poin banyak,positif
+reward menarik,positif
+dana masuk,positif
+saldo bertambah,positif
+uang masuk,positif
+terima kasih,positif
+makasih,positif
+thank you,positif
+puas,positif
+sangat puas,positif
+memuaskan,positif
+sesuai harapan,positif
+melebihi ekspektasi,positif
+kagum,positif
+cinta,positif
+sukai,positif
+gemar,positif
+demam,positif
+terhibur,positif
+senyum,positif
+bahagia,positif
+gembira,positif
+lega,positif
+tenang,positif
+damai,positif
+nyaman di hati,positif
+mantul,positif
+gass,positif
+gas terus,positif
+jelek,negatif
+buruk,negatif
+tidak,negatif
+jangan,negatif
+kurang,negatif
+susah,negatif
+lambat,negatif
+berat,negatif
+ribet,negatif
+error,negatif
+gagal,negatif
+lemot,negatif
+ngadat,negatif
+mengganggu,negatif
+payah,negatif
+kecewa,negatif
+kesal,negatif
+jengkel,negatif
+saldo hilang,negatif
+uang hilang,negatif
+saldo raib,negatif
+saldo berkurang,negatif
+terpotong,negatif
+transaksi gagal,negatif
+bayar gagal,negatif
+topup gagal,negatif
+transfer gagal,negatif
+pending terus,negatif
+verifikasi gagal,negatif
+login gagal,negatif
+tidak bisa login,negatif
+akun diblokir,negatif
+akun dibekukan,negatif
+maintenance lama,negatif
+server error,negatif
+force close,negatif
+crash,negatif
+bug,negatif
+lag,negatif
+cs tidak respon,negatif
+laporan tidak ditanggapi,negatif
+tidak ada solusi,negatif
+fitnah,negatif
+bohong,negatif
+ampas,negatif
+norak,negatif
+tolol,negatif
+bodoh,negatif
+goblok,negatif
+dungu,negatif
+menyebalkan,negatif
+tolonggg,negatif
+kenapa sih,negatif
+kok gitu,negatif
+gimana sih,negatif
+capek deh,negatif
+elah,negatif
+haduh,negatif
+dana ilang,negatif
+saldo ilang,negatif
+uang ilang,negatif
+dimakan,negatif
+disedot,negatif
+raib,negatif
+lenyap,negatif
+menguap,negatif
+gagal mulu,negatif
+error terus,negatif
+lag error,negatif
+eror,negatif
+force close terus,negatif
+crash mulu,negatif
+loading lama,negatif
+putar-putar,negatif
+terus loading,negatif
+lemot banget,negatif
+lamban,negatif
+lambat banget,negatif
+tidak bisa buka,negatif
+tidak bisa akses,negatif
+gagal login,negatif
+susah login,negatif
+lupa password,negatif
+verifikasi susah,negatif
+otp tidak masuk,negatif
+sms tidak datang,negatif
+kode verifikasi salah,negatif
+transfer gagal,negatif
+pengiriman gagal,negatif
+gagal kirim,negatif
+gagal terima,negatif
+dana keluar sendiri,negatif
+terpotong padahal gagal,negatif
+kebayar dua kali,negatif
+duplikat,negatif
+transaksi dobel,negatif
+biaya mahal,negatif
+admin besar,negatif
+banyak potongan,negatif
+dipotong terus,negatif
+tersembunyi,negatif
+promo tipu,negatif
+cashback tidak masuk,negatif
+voucher tidak valid,negatif
+diskon palsu,negatif
+cs lemot,negatif
+lama respon,negatif
+diam aja,negatif
+auto reply,negatif
+bot melulu,negatif
+tidak ada solusi,negatif
+laporan diabaikan,negatif
+tidak ditanggapi,negatif
+dibiarkan,negatif
+tidak peduli,negatif
+masa bodoh,negatif
+menyesal,negatif
+nyesel,negatif
+saya sesali,negatif
+rugi,negatif
+boros,negatif
+mubazir,negatif
+hanya sekali,negatif
+uninstall,negatif
+hapus,negatif
+pindah aplikasi,negatif
+tinggalkan,negatif
+cabut,negatif
+udahan,negatif
+berhenti,negatif
