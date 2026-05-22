@@ -16,17 +16,21 @@ Proyek ini menyediakan pipeline preprocessing lengkap untuk:
 ## Struktur Folder
 
 ```
-preprocessing/
-├── Eksperimen_Chairul-Ikhsan.ipynb           (Notebook interaktif)
-├── automate_Chairul-Ikhsan.py                (Script otomatis)
-├── requirements.txt                          (Dependencies)
-├── ulasan-aplikasi-dana_preprocessing/       (Output folder)
-└── README.md
-
-../
-├── ulasan-aplikasi-dana_raw/
-│   └── ulasan-aplikasi-dana.csv              (Dataset raw)
-└── README.md                                 (Root dokumentasi)
+Eksperimen_SML_Chairul-Ikhsan/
+├── README.md                                 (Dokumentasi)
+├── preprocessing/
+│   ├── Eksperimen_Chairul-Ikhsan.ipynb       (Notebook interaktif)
+│   ├── automate_Chairul-Ikhsan.py            (Script otomatis)
+│   ├── requirements.txt                      (Dependencies)
+│   ├── lexicon/
+│   │   └── lexicon_dana.csv                  (Kamus sentimen DANA)
+│   └── ulasan-aplikasi-dana_preprocessing/   (Output preprocessing)
+│       ├── data_preprocessed.csv
+│       ├── metadata.json
+│       ├── X_train.csv, X_val.csv, X_test.csv
+│       └── y_train.csv, y_val.csv, y_test.csv
+└── ulasan-aplikasi-dana_raw/
+    └── ulasan-aplikasi-dana.csv              (Dataset raw)
 ```
 
 ## Requirements
@@ -41,6 +45,7 @@ wordcloud
 nltk
 scikit-learn
 sastrawi
+Request
 ```
 
 ## Instalasi
@@ -55,7 +60,7 @@ cd preprocessing
 pip install pandas numpy matplotlib seaborn wordcloud nltk scikit-learn sastrawi
 ```
 
-3. Pastikan dataset tersedia:
+3. Pastikan dataset tersedia di:
 ```bash
 ../ulasan-aplikasi-dana_raw/ulasan-aplikasi-dana.csv
 ```
@@ -82,13 +87,18 @@ Script akan menjalankan seluruh pipeline preprocessing dan menampilkan summary h
 
 Setelah preprocessing selesai, folder `ulasan-aplikasi-dana_preprocessing/` akan berisi:
 
-- `data_preprocessed.csv/` - Dataset lengkap setelah preprocessing
-- `X_train.csv/` - Teks training
-- `X_val.csv/` - Teks validasi
-- `X_test.csv/` - Teks testing
-- `y_train.csv/` - Label training
-- `y_val.csv/` - Label validasi
-- `y_test.csv/` - Label testing
+- `data_preprocessed.csv` - Dataset lengkap setelah preprocessing
+- `metadata.json` - Informasi metadata dan summary preprocessing
+- `X_train.csv` - Teks training (70% dataset)
+- `X_val.csv` - Teks validasi (15% dataset)
+- `X_test.csv` - Teks testing (15% dataset)
+- `y_train.csv` - Label sentimen training
+- `y_val.csv` - Label sentimen validasi
+- `y_test.csv` - Label sentimen testing
+
+### File Pendukung
+
+- `preprocessing/lexicon/lexicon_dana.csv` - Kamus lexicon untuk analisis sentimen aplikasi DANA
 
 ## Tahap Preprocessing
 
@@ -104,3 +114,16 @@ Setelah preprocessing selesai, folder `ulasan-aplikasi-dana_preprocessing/` akan
 10. **Pemisahan data** - Split train/validasi/test (70/15/15) dengan stratifikasi
 11. **Export hasil** - Menyimpan dalam format CSV
 
+## Catatan Penting
+
+- Dataset preprocessing menggunakan lexicon-based approach berdasarkan `lexicon_dana.csv`
+- Stratifikasi di tahap pemisahan data memastikan distribusi sentimen merata di train/val/test
+- Untuk custom processing, dapat memodifikasi script `automate_Chairul-Ikhsan.py` atau notebook
+
+## Author
+
+- **Chairul Ikhsan** APC526D6Y0545
+
+## Lisensi
+
+Pijak x IBM SkillsBuild Dicoding 2026 - Proyek Membangun Sistem Machine Learning
