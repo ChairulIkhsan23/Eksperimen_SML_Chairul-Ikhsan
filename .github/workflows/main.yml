@@ -15,7 +15,7 @@ on:
 jobs:
   preprocessing:
     runs-on: ubuntu-latest
-    timeout-minutes: 30                         # Batas waktu maksimal 30 menit
+    timeout-minutes: 120                         # Batas waktu maksimal 120 menit
 
     steps:
       # 1. Menampilkan informasi awal job
