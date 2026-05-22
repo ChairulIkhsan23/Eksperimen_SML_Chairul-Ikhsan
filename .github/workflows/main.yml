@@ -140,7 +140,32 @@ jobs:
           print('✓ Semua validasi berhasil')
           "
 
-      # 9. Mengupload hasil preprocessing ke GitHub sebagai artifact
+      # 9. Commit dan push hasil preprocessing ke repository 
+      - name: Commit and push preprocessed dataset
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Cari lokasi output directory
+          if [ -d "preprocessing/ulasan-aplikasi-dana_preprocessing" ]; then
+            OUT_DIR="preprocessing/ulasan-aplikasi-dana_preprocessing"
+          elif [ -d "../preprocessing/ulasan-aplikasi-dana_preprocessing" ]; then
+            OUT_DIR="../preprocessing/ulasan-aplikasi-dana_preprocessing"
+          else
+            echo "✗ Output directory tidak ditemukan"
+            exit 1
+          fi
+
+          git add "$OUT_DIR/"
+          git diff --staged --quiet && echo "✓ Tidak ada perubahan baru pada hasil preprocessing." || (
+            git commit -m "ci: update preprocessed dataset [$(date +'%Y-%m-%d %H:%M:%S')]"
+            git push
+            echo "✓ Hasil preprocessing berhasil diupdate ke repository"
+          )
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 10. Mengupload hasil preprocessing ke GitHub sebagai artifact (backup)
       - name: Upload Preprocessing Results
         uses: actions/upload-artifact@v4
         with:
@@ -151,7 +176,7 @@ jobs:
           retention-days: 30                       # Masa penyimpanan 30 hari
           if-no-files-found: warn
 
-      # 10. Ringkasan akhir job (selalu dijalankan, sukses atau gagal)
+      # 11. Ringkasan akhir job (selalu dijalankan, sukses atau gagal)
       - name: Complete job
         if: always()
         run: |
