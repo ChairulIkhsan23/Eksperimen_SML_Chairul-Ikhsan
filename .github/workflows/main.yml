@@ -193,3 +193,5 @@ jobs:
           else
             echo "  ✗ Output directory tidak ditemukan"
           fi
+
+print("Workflow triggered at $(date)")
