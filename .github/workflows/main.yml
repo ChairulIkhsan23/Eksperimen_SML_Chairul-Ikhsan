@@ -170,7 +170,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: preprocessing-results               # Nama artifact
-          path: preprocessing/ulasan-aplikasi-dana_preprocessing/ # path
+          path: preprocessing/ulasan-aplikasi-dana_preprocessing/ 
           retention-days: 30                       # Masa penyimpanan 30 hari
           if-no-files-found: warn
 
