@@ -114,7 +114,7 @@ Setelah preprocessing selesai, folder `ulasan-aplikasi-dana_preprocessing/` akan
 10. **Pemisahan data** - Split train/validasi/test (70/15/15) dengan stratifikasi
 11. **Export hasil** - Menyimpan dalam format CSV
 
-## Catatan Penting
+## Catatan 
 
 - Dataset preprocessing menggunakan lexicon-based approach berdasarkan `lexicon_dana.csv`
 - Stratifikasi di tahap pemisahan data memastikan distribusi sentimen merata di train/val/test
