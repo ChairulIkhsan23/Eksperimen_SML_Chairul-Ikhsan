@@ -78,6 +78,7 @@ jobs:
 
       # 7. Menjalankan script preprocessing otomatis
       - name: Run Preprocessing
+        working-directory: preprocessing
         run: |
           echo "Memulai preprocessing dataset..."
           python automate_Chairul-Ikhsan.py
