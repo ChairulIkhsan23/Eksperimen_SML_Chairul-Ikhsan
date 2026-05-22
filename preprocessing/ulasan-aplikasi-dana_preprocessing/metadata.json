@@ -1,19 +1,19 @@
 {
-  "timestamp": "2026-05-22T23:55:01.583535",
+  "timestamp": "2026-05-22T17:36:02.125626",
   "preprocessing_info": {
     "original_rows": 15000,
     "original_columns": 12,
     "final_rows": 14995,
     "final_columns": 19,
-    "rows_retained_percentage": 99.97
+    "rows_retained_percentage": 99.96666666666667
   },
   "data_split": {
     "train_samples": 10496,
-    "train_percentage": 70.0,
+    "train_percentage": 69.99666555518506,
     "validation_samples": 2249,
-    "validation_percentage": 15.0,
+    "validation_percentage": 14.99833277759253,
     "test_samples": 2250,
-    "test_percentage": 15.01,
+    "test_percentage": 15.005001667222405,
     "random_state": 42,
     "stratify": true
   },
