@@ -97,94 +97,86 @@ def stem_tokens(tokens, stemmer):
     return [stemmer.stem(token) for token in tokens]
 
 
-# Fungsi Pelabelan Sentimen dengan Lexicon
+# Fungsi Pelabelan Sentimen dengan Lexicon (SAMA DENGAN NOTEBOOK)
 def load_lexicons():
     """
     Memuat kamus kata positif dan negatif dari file lokal dan GitHub.
+    Sama persis dengan implementasi di notebook.
 
     Returns:
-        tuple: (lexicon_positive dict, lexicon_negative dict)
+        tuple: (positive_lexicon list, negative_lexicon list)
     """
-    lexicon_positive = dict()
-    lexicon_negative = dict()
-
     # Load dari file lokal
-    local_path = Path('lexicon/lexicon_dana.csv')
-    if local_path.exists():
-        df_lexicon = pd.read_csv(local_path)
-        for _, row in df_lexicon.iterrows():
-            if row['sentimen'] == 'positif':
-                lexicon_positive[row['kata']] = 1
-            elif row['sentimen'] == 'negatif':
-                lexicon_negative[row['kata']] = -1
-        print(f'Lexicon lokal - positif: {len(lexicon_positive)}, negatif: {len(lexicon_negative)}')
+    lexicon_path = Path('lexicon/lexicon_dana.csv')
+    positive_local = []
+    negative_local = []
+    
+    if lexicon_path.exists():
+        df_lexicon = pd.read_csv(lexicon_path)
+        positive_local = df_lexicon[df_lexicon['sentimen'] == 'positif']['kata'].tolist()
+        negative_local = df_lexicon[df_lexicon['sentimen'] == 'negatif']['kata'].tolist()
+        print(f'✓ Lexicon lokal - positif: {len(positive_local)}, negatif: {len(negative_local)}')
     else:
-        print('File lokal tidak ditemukan')
+        print('X | File lexicon lokal tidak ditemukan')
 
     # Download dari GitHub
+    positive_github = []
     response = requests.get('https://raw.githubusercontent.com/angelmetanosaa/dataset/main/lexicon_positive.csv')
     if response.status_code == 200:
         reader = csv.reader(StringIO(response.text), delimiter=',')
         for row in reader:
-            lexicon_positive[row[0]] = int(row[1])
+            positive_github.append(row[0])
+        print(f'✓ Lexicon GitHub - positif: {len(positive_github)}')
     else:
-        print('Gagal mengunduh kamus kata positif dari GitHub')
+        print('X | Gagal mengunduh lexicon positif dari GitHub')
 
+    negative_github = []
     response = requests.get('https://raw.githubusercontent.com/angelmetanosaa/dataset/main/lexicon_negative.csv')
     if response.status_code == 200:
         reader = csv.reader(StringIO(response.text), delimiter=',')
         for row in reader:
-            lexicon_negative[row[0]] = int(row[1])
+            negative_github.append(row[0])
+        print(f'✓ Lexicon GitHub - negatif: {len(negative_github)}')
     else:
-        print('Gagal mengunduh kamus kata negatif dari GitHub')
+        print('X | Gagal mengunduh lexicon negatif dari GitHub')
 
-    print(f'Jumlah kata dalam kamus positif : {len(lexicon_positive)}')
-    print(f'Jumlah kata dalam kamus negatif : {len(lexicon_negative)}')
+    # Gabungkan (sama persis dengan notebook)
+    positive_lexicon = list(set(positive_local + positive_github))
+    negative_lexicon = list(set(negative_local + negative_github))
 
-    return lexicon_positive, lexicon_negative
+    print(f'✓ Lexicon gabungan - positif: {len(positive_lexicon)}, negatif: {len(negative_lexicon)}')
+    
+    return positive_lexicon, negative_lexicon
 
 
-def sentiment_analysis_lexicon_indonesia(text, lexicon_positive, lexicon_negative):
+def sentiment_analysis_lexicon_indonesia(text, positive_lexicon, negative_lexicon):
     """
     Lakukan analisis sentimen menggunakan pendekatan berbasis lexicon.
-    Setiap token dalam teks dicocokkan dengan kamus positif dan negatif.
-    Skor akhir menentukan polaritas sentimen.
-
+    Sama persis dengan implementasi di notebook.
+    
     Args:
-        text (list or str): Teks atau daftar token yang akan dianalisis
-        lexicon_positive (dict): Kamus kata positif beserta skornya
-        lexicon_negative (dict): Kamus kata negatif beserta skornya
-
+        text (str): Teks yang telah diproses untuk dianalisis
+        positive_lexicon (list): Daftar kata positif
+        negative_lexicon (list): Daftar kata negatif
+        
     Returns:
         tuple: (sentiment_score, polarity)
     """
-    # Mendukung input berupa list token maupun string
-    if isinstance(text, str):
-        tokens = text.split()
-    else:
-        tokens = text
-
-    score = 0
-
-    # Menjumlahkan skor kata-kata yang ada di kamus positif
-    for word in tokens:
-        if word in lexicon_positive:
-            score = score + lexicon_positive[word]
-
-    # Menjumlahkan skor kata-kata yang ada di kamus negatif
-    for word in tokens:
-        if word in lexicon_negative:
-            score = score + lexicon_negative[word]
-
-    # Menentukan polaritas berdasarkan nilai skor akhir
-    if score > 0:
+    tokens = text.split()
+    
+    positive_count = sum(1 for token in tokens if token in positive_lexicon)
+    negative_count = sum(1 for token in tokens if token in negative_lexicon)
+    
+    sentiment_score = positive_count - negative_count
+    
+    if sentiment_score > 0:
         polarity = 'positive'
-    elif score < 0:
+    elif sentiment_score < 0:
         polarity = 'negative'
     else:
         polarity = 'neutral'
-
-    return score, polarity
+    
+    return sentiment_score, polarity
 
 
 # Fungsi Visualisasi EDA
@@ -374,140 +366,140 @@ def preprocess_dataset(input_path, output_dir=None, simpan_visualisasi=True):
         vis_dir.mkdir(parents=True, exist_ok=True)
 
     # Langkah 1: Memuat dataset
-    print('Langkah 1: Memuat dataset')
+    print('✓ Langkah 1: Memuat dataset')
     df = pd.read_csv(input_path, on_bad_lines='skip')
-    print(f'  Jumlah baris   : {df.shape[0]}')
-    print(f'  Jumlah kolom   : {df.shape[1]}')
-    print(f'  Nama kolom     : {list(df.columns)}')
+    print(f'  ✓ Jumlah baris   : {df.shape[0]}')
+    print(f'  ✓ Jumlah kolom   : {df.shape[1]}')
+    print(f'  ✓ Nama kolom     : {list(df.columns)}')
 
     # EDA: Info, statistik, nilai kosong, distribusi skor
-    print('\nEDA: Info Dataset')
+    print('\n✓ Info Dataset:')
     print(df.info())
 
-    print('\nEDA: Statistik Deskriptif')
+    print('\n✓ Statistik Deskriptif:')
     print(df.describe())
 
-    print('\nEDA: Nilai Kosong per Kolom')
+    print('\n✓ Nilai Kosong (Missing Values):')
     missing = df.isnull().sum()
     print(missing[missing > 0])
-    print(f'Total nilai kosong: {missing.sum()}')
+    print(f'\n✓ Total nilai kosong: {missing.sum()}')
 
-    print('\nEDA: Distribusi Skor')
+    print('\n✓ Distribusi Skor:')
     print(df['score'].value_counts().sort_index())
 
     df['review_length'] = df['content'].fillna('').str.len()
-    print(f'\nRata-rata panjang ulasan : {df["review_length"].mean():.2f} karakter')
-    print(f'Panjang ulasan minimum   : {df["review_length"].min()} karakter')
-    print(f'Panjang ulasan maksimum  : {df["review_length"].max()} karakter')
+    print(f'\n✓ Rata-rata panjang ulasan : {df["review_length"].mean():.2f} karakter')
+    print(f'✓ Panjang ulasan minimum   : {df["review_length"].min()} karakter')
+    print(f'✓ Panjang ulasan maksimum  : {df["review_length"].max()} karakter')
 
     plot_distribusi_skor(df, vis_dir)
     plot_panjang_ulasan(df, vis_dir)
 
-    print('\nEDA: Contoh 5 Ulasan Pertama')
+    print('\n✓ Contoh 5 Ulasan Pertama:')
     for idx in range(min(5, len(df))):
-        print(f'Ulasan {idx + 1}:')
-        print(f'  Skor : {df.iloc[idx]["score"]}')
-        print(f'  Isi  : {df.iloc[idx]["content"]}')
-        print('-' * 80)
+        print(f'  Ulasan {idx + 1}:')
+        print(f'    Skor : {df.iloc[idx]["score"]}')
+        print(f'    Isi  : {df.iloc[idx]["content"]}')
+        print('  ' + '-' * 76)
 
     # Langkah 2: Tangani nilai kosong
-    print('\nLangkah 2: Tangani nilai kosong')
+    print('\n✓ Langkah 2: Tangani nilai kosong')
     df_clean = df.dropna(subset=['content']).copy()
     df_clean = df_clean[df_clean['content'].str.strip() != ''].copy()
-    print(f'  Baris sebelum : {df.shape[0]}')
-    print(f'  Baris sesudah : {df_clean.shape[0]}')
-    print(f'  Baris dihapus : {df.shape[0] - df_clean.shape[0]}')
+    print(f'  ✓ Baris sebelum : {df.shape[0]}')
+    print(f'  ✓ Baris sesudah : {df_clean.shape[0]}')
+    print(f'  ✓ Baris dihapus : {df.shape[0] - df_clean.shape[0]}')
 
     # Langkah 3: Tangani duplikat
-    print('\nLangkah 3: Tangani duplikat')
+    print('\n✓ Langkah 3: Tangani duplikat')
     sebelum_dedup = df_clean.shape[0]
     df_clean = df_clean.drop_duplicates(
         subset=['content'], keep='first'
     ).reset_index(drop=True)
-    print(f'  Baris sebelum : {sebelum_dedup}')
-    print(f'  Baris sesudah : {df_clean.shape[0]}')
-    print(f'  Duplikat dihapus : {sebelum_dedup - df_clean.shape[0]}')
+    print(f'  ✓ Baris sebelum : {sebelum_dedup}')
+    print(f'  ✓ Baris sesudah : {df_clean.shape[0]}')
+    print(f'  ✓ Duplikat dihapus : {sebelum_dedup - df_clean.shape[0]}')
 
     # Langkah 4: Pembersihan teks
-    print('\nLangkah 4: Pembersihan teks')
+    print('\n✓ Langkah 4: Pembersihan teks')
     df_clean['text_cleaned'] = df_clean['content'].apply(bersihkan_teks)
 
-    print('Sampel pembersihan teks (3 pertama):')
+    print('  Sampel pembersihan teks (3 pertama):')
     for idx in range(min(3, len(df_clean))):
-        print(f'  Asli   : {df_clean.iloc[idx]["content"]}')
-        print(f'  Bersih : {df_clean.iloc[idx]["text_cleaned"]}')
-        print('  ' + '-' * 60)
+        print(f'    Asli   : {df_clean.iloc[idx]["content"]}')
+        print(f'    Bersih : {df_clean.iloc[idx]["text_cleaned"]}')
+        print('    ' + '-' * 56)
 
     # Langkah 5: Tokenisasi
-    print('\nLangkah 5: Tokenisasi')
+    print('\n✓ Langkah 5: Tokenisasi')
     df_clean['tokens'] = df_clean['text_cleaned'].apply(tokenize_text)
 
-    print('Sampel tokenisasi (3 pertama):')
+    print('  Sampel tokenisasi (3 pertama):')
     for idx in range(min(3, len(df_clean))):
-        print(f'  Teks bersih : {df_clean.iloc[idx]["text_cleaned"]}')
-        print(f'  Token       : {df_clean.iloc[idx]["tokens"]}')
-        print('  ' + '-' * 60)
+        print(f'    Teks bersih : {df_clean.iloc[idx]["text_cleaned"]}')
+        print(f'    Token       : {df_clean.iloc[idx]["tokens"]}')
+        print('    ' + '-' * 56)
 
     # Langkah 6: Hapus stopwords
-    print('\nLangkah 6: Hapus stopwords')
+    print('\n✓ Langkah 6: Hapus stopwords')
     df_clean['tokens_no_stopwords'] = df_clean['tokens'].apply(remove_stopwords)
 
-    print('Sampel penghapusan stopwords (3 pertama):')
+    print('  Sampel penghapusan stopwords (3 pertama):')
     for idx in range(min(3, len(df_clean))):
-        print(f'  Dengan stopwords : {df_clean.iloc[idx]["tokens"]}')
-        print(f'  Tanpa stopwords  : {df_clean.iloc[idx]["tokens_no_stopwords"]}')
-        print('  ' + '-' * 60)
+        print(f'    Dengan stopwords : {df_clean.iloc[idx]["tokens"]}')
+        print(f'    Tanpa stopwords  : {df_clean.iloc[idx]["tokens_no_stopwords"]}')
+        print('    ' + '-' * 56)
 
     # Langkah 7: Stemming
-    print('\nLangkah 7: Stemming')
+    print('\n✓ Langkah 7: Stemming')
     stemmer = StemmerFactory().create_stemmer()
     df_clean['tokens_stemmed'] = df_clean['tokens_no_stopwords'].apply(
         lambda tokens: stem_tokens(tokens, stemmer)
     )
 
-    print('Sampel stemming (3 pertama):')
+    print('  Sampel stemming (3 pertama):')
     for idx in range(min(3, len(df_clean))):
-        print(f'  Sebelum stemming : {df_clean.iloc[idx]["tokens_no_stopwords"]}')
-        print(f'  Sesudah stemming : {df_clean.iloc[idx]["tokens_stemmed"]}')
-        print('  ' + '-' * 60)
+        print(f'    Sebelum stemming : {df_clean.iloc[idx]["tokens_no_stopwords"]}')
+        print(f'    Sesudah stemming : {df_clean.iloc[idx]["tokens_stemmed"]}')
+        print('    ' + '-' * 56)
 
     # Langkah 8: Gabungkan token menjadi teks akhir
-    print('\nLangkah 8: Gabungkan token')
+    print('\n✓ Langkah 8: Gabungkan token')
     df_clean['text_akhir'] = df_clean['tokens_stemmed'].apply(
         lambda tokens: ' '.join(tokens)
     )
 
-    print('Sampel teks akhir (3 pertama):')
+    print('  Sampel teks akhir (3 pertama):')
     for idx in range(min(3, len(df_clean))):
-        print(f'  Token     : {df_clean.iloc[idx]["tokens_stemmed"]}')
-        print(f'  Teks akhir: {df_clean.iloc[idx]["text_akhir"]}')
-        print('  ' + '-' * 60)
+        print(f'    Token     : {df_clean.iloc[idx]["tokens_stemmed"]}')
+        print(f'    Teks akhir: {df_clean.iloc[idx]["text_akhir"]}')
+        print('    ' + '-' * 56)
 
-    # Langkah 9: Pelabelan sentimen berbasis lexicon
-    print('\nLangkah 9: Pelabelan sentimen berbasis lexicon')
-    lexicon_positive, lexicon_negative = load_lexicons_from_github()
-
-    df_clean[['polarity_score', 'polarity']] = df_clean['tokens_no_stopwords'].apply(
-        lambda tokens: pd.Series(
-            sentiment_analysis_lexicon_indonesia(tokens, lexicon_positive, lexicon_negative)
-        )
+    # Langkah 9: Pelabelan sentimen berbasis lexicon (SAMA DENGAN NOTEBOOK)
+    print('\n✓ Langkah 9: Pelabelan sentimen berbasis lexicon')
+    positive_lexicon, negative_lexicon = load_lexicons()
+    
+    # Menggunakan text_akhir (string) - sama persis dengan notebook
+    df_clean[['sentiment_score', 'polarity']] = df_clean['text_akhir'].apply(
+        lambda x: pd.Series(sentiment_analysis_lexicon_indonesia(x, positive_lexicon, negative_lexicon))
     )
 
-    print('Distribusi label sentimen:')
-    print(df_clean['polarity'].value_counts())
-    print('\nPersentase:')
+    print('\n✓ Distribusi Sentimen:')
+    sentiment_counts = df_clean['polarity'].value_counts()
+    print(sentiment_counts)
+    print('\n✓ Persentase:')
     print((df_clean['polarity'].value_counts(normalize=True) * 100).round(2))
 
     plot_distribusi_sentimen(df_clean, vis_dir)
     plot_wordcloud(df_clean, vis_dir)
 
     # Langkah 10: Membagi data train, validasi, test (70/15/15)
-    print('\nLangkah 10: Membagi data (70% train, 15% validasi, 15% test)')
+    print('\n✓ Langkah 10: Membagi data (70% train, 15% validasi, 15% test)')
     X = df_clean['text_akhir'].values
     y = df_clean['polarity'].values
 
-    print(f'Total sampel          : {len(X)}')
-    print(f'Distribusi kelas      : {pd.Series(y).value_counts().to_dict()}')
+    print(f'  ✓ Total sampel          : {len(X)}')
+    print(f'  ✓ Distribusi kelas      : {pd.Series(y).value_counts().to_dict()}')
 
     X_train, X_temp, y_train, y_temp = train_test_split(
         X, y, test_size=0.30, stratify=y, random_state=42
@@ -516,11 +508,11 @@ def preprocess_dataset(input_path, output_dir=None, simpan_visualisasi=True):
         X_temp, y_temp, test_size=0.50, stratify=y_temp, random_state=42
     )
 
-    print(f'  Train      : {len(X_train)} ({len(X_train) / len(X) * 100:.1f}%)')
-    print(f'  Validasi   : {len(X_val)} ({len(X_val) / len(X) * 100:.1f}%)')
-    print(f'  Test       : {len(X_test)} ({len(X_test) / len(X) * 100:.1f}%)')
+    print(f'  ✓ Train      : {len(X_train)} ({len(X_train) / len(X) * 100:.1f}%)')
+    print(f'  ✓ Validasi   : {len(X_val)} ({len(X_val) / len(X) * 100:.1f}%)')
+    print(f'  ✓ Test       : {len(X_test)} ({len(X_test) / len(X) * 100:.1f}%)')
 
-    print('\nVerifikasi distribusi kelas:')
+    print('\n✓ Verifikasi distribusi kelas:')
     for nama, label_array in [('Train', y_train), ('Validasi', y_val), ('Test', y_test)]:
         dist = pd.Series(label_array).value_counts()
         pct = (dist / len(label_array) * 100).round(2)
@@ -529,13 +521,13 @@ def preprocess_dataset(input_path, output_dir=None, simpan_visualisasi=True):
             print(f'    {sentimen}: {dist[sentimen]} ({pct[sentimen]}%)')
 
     # Langkah 11: Menyimpan hasil preprocessing
-    print(f'\nLangkah 11: Menyimpan hasil ke {output_dir}')
+    print(f'\n✓ Langkah 11: Menyimpan hasil ke {output_dir}')
 
     preprocessed_data = df_clean[[
-        'content', 'score', 'text_akhir', 'polarity', 'polarity_score'
+        'content', 'score', 'text_akhir', 'polarity', 'sentiment_score'
     ]].copy()
     preprocessed_data.to_csv(output_dir / 'data_preprocessed.csv', index=False)
-    print(f'  Tersimpan: data_preprocessed.csv ({preprocessed_data.shape[0]} baris)')
+    print(f'  ✓ Tersimpan: data_preprocessed.csv ({preprocessed_data.shape[0]} baris)')
 
     pd.DataFrame(X_train, columns=['text']).to_csv(output_dir / 'X_train.csv', index=False)
     pd.DataFrame(X_val, columns=['text']).to_csv(output_dir / 'X_val.csv', index=False)
@@ -545,11 +537,11 @@ def preprocess_dataset(input_path, output_dir=None, simpan_visualisasi=True):
     pd.DataFrame(y_val, columns=['polarity']).to_csv(output_dir / 'y_val.csv', index=False)
     pd.DataFrame(y_test, columns=['polarity']).to_csv(output_dir / 'y_test.csv', index=False)
 
-    print('  Tersimpan: X_train.csv, X_val.csv, X_test.csv')
-    print('  Tersimpan: y_train.csv, y_val.csv, y_test.csv')
+    print('  ✓ Tersimpan: X_train.csv, X_val.csv, X_test.csv')
+    print('  ✓ Tersimpan: y_train.csv, y_val.csv, y_test.csv')
 
     # Langkah 12: Membuat metadata.json
-    print('\nLangkah 12: Membuat metadata.json')
+    print('\n✓ Langkah 12: Membuat metadata.json')
     sentiment_dist = df_clean['polarity'].value_counts().to_dict()
     
     metadata = {
@@ -602,7 +594,7 @@ def preprocess_dataset(input_path, output_dir=None, simpan_visualisasi=True):
     metadata_path = output_dir / 'metadata.json'
     with open(metadata_path, 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
-    print(f'  Tersimpan: metadata.json')
+    print(f'  ✓ Tersimpan: metadata.json')
 
     results = {
         'df_clean': df_clean,
@@ -636,13 +628,13 @@ def print_preprocessing_summary(results):
     print('RINGKASAN PREPROCESSING')
     print('=' * 80)
 
-    print('\nPerbandingan Bentuk Data:')
+    print('\n✓ Perbandingan Bentuk Data:')
     print(f'  Dataset asli           : {results["original_shape"][0]} baris, {results["original_shape"][1]} kolom')
     print(f'  Setelah preprocessing  : {results["final_shape"][0]} baris, {results["final_shape"][1]} kolom')
     pct_retained = results["final_shape"][0] / results["original_shape"][0] * 100
     print(f'  Baris yang dipertahankan: {results["final_shape"][0]} ({pct_retained:.1f}%)')
 
-    print('\nTahap Preprocessing yang Diterapkan:')
+    print('\n✓ Tahap Preprocessing yang Diterapkan:')
     stages = [
         '1. Tangani nilai kosong (hapus isi kosong)',
         '2. Tangani duplikat (hapus isi duplikat)',
@@ -655,26 +647,27 @@ def print_preprocessing_summary(results):
         '9. Pemisahan data (70% train, 15% val, 15% test dengan stratifikasi)',
     ]
     for stage in stages:
-        print(f'  {stage}')
+        print(f'  ✓ {stage}')
 
-    print('\nFile Output yang Dibuat:')
+    print('\n✓ File Output yang Dibuat:')
     output_files = [
         'data_preprocessed.csv',
         'X_train.csv, X_val.csv, X_test.csv',
         'y_train.csv, y_val.csv, y_test.csv',
+        'metadata.json'
     ]
     for f in output_files:
-        print(f'  {f}')
+        print(f'  ✓ {f}')
 
-    print(f'\nDirektori output: {results["output_dir"]}')
+    print(f'\n✓ Direktori output: {results["output_dir"]}')
 
     total = results['train_size'] + results['val_size'] + results['test_size']
-    print('\nStatistik Pembagian Data:')
+    print('\n✓ Statistik Pembagian Data:')
     print(f'  Train    : {results["train_size"]} sampel ({results["train_size"] / total * 100:.1f}%)')
     print(f'  Validasi : {results["val_size"]} sampel ({results["val_size"] / total * 100:.1f}%)')
     print(f'  Test     : {results["test_size"]} sampel ({results["test_size"] / total * 100:.1f}%)')
 
-    print('\nDistribusi Sentimen (Dataset Akhir):')
+    print('\n✓ Distribusi Sentimen (Dataset Akhir):')
     df_clean = results['df_clean']
     for sentimen in ['positive', 'negative', 'neutral']:
         count = (df_clean['polarity'] == sentimen).sum()
@@ -682,7 +675,7 @@ def print_preprocessing_summary(results):
         print(f'  {sentimen}: {count} ({pct:.1f}%)')
 
     print('\n' + '=' * 80)
-    print('Preprocessing selesai.')
+    print('✓ Preprocessing selesai!')
 
 
 # Entry Point
