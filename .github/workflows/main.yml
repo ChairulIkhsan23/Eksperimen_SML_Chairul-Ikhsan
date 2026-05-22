@@ -1,22 +1,24 @@
 name: Automate Preprocessing Pipeline
 
+# Trigger workflow
 on:
   push:
     branches:
       - main
     paths:
-      - "ulasan-aplikasi-dana_raw/**"
-      - "preprocessing/automate_Chairul-Ikhsan.py"
-      - "preprocessing/lexicon/**"
-      - ".github/workflows/main.yml"
-  workflow_dispatch:
+      - "ulasan-aplikasi-dana_raw/**"               # Berjalan jika ada perubahan di folder raw dataset
+      - "preprocessing/automate_Chairul-Ikhsan.py"  # Berjalan jika file preprocessing berubah
+      - "preprocessing/lexicon/**"                  # Berjalan jika file lexicon berubah
+      - ".github/workflows/main.yml"                # Berjalan jika workflow itu sendiri berubah
+  workflow_dispatch:                                # Memungkinkan menjalankan workflow manual dari GitHub UI
 
 jobs:
   preprocessing:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 30                         # Batas waktu maksimal 30 menit
 
     steps:
+      # 1. Menampilkan informasi awal job
       - name: Set up job
         run: |
           echo "Preprocessing Pipeline - Chairul Ikhsan"
@@ -24,19 +26,34 @@ jobs:
           echo "Branch   : ${{ github.ref_name }}"
           echo "Commit   : ${{ github.sha }}"
 
+      # 2. Mengambil kode dari repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # 3. Menyiapkan environment Python 3.12.7
       - name: Setup Python 3.12
         uses: actions/setup-python@v4
         with:
           python-version: '3.12.7'
 
+      # 4. Menginstall semua library yang dibutuhkan dari requirements.txt
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r preprocessing/requirements.txt
 
+      # 5. Download NLTK data
+      - name: Download NLTK Data
+        run: |
+          python -c "
+          import nltk
+          nltk.download('punkt', quiet=True)
+          nltk.download('punkt_tab', quiet=True)
+          nltk.download('stopwords', quiet=True)
+          print('✓ NLTK data downloaded successfully')
+          "
+
+      # 6. Memeriksa apakah file dataset yang diperlukan ada
       - name: Verify dataset files
         run: |
           echo "Memeriksa file dataset..."
@@ -50,59 +67,105 @@ jobs:
           for f in files:
               if os.path.exists(f):
                   size = os.path.getsize(f)
-                  print(f'  File ditemukan: {f} ({size:,} bytes)')
+                  print(f'  ✓ File ditemukan: {f} ({size:,} bytes)')
               else:
-                  print(f'  File tidak ditemukan: {f}')
+                  print(f'  ✗ File tidak ditemukan: {f}')
                   all_ok = False
           if not all_ok:
               sys.exit(1)
-          print('Semua file tersedia')
+          print('✓ Semua file tersedia')
           "
 
+      # 7. Menjalankan script preprocessing otomatis
       - name: Run Preprocessing
         working-directory: preprocessing
         run: |
           echo "Memulai preprocessing dataset..."
           python automate_Chairul-Ikhsan.py
-          echo "Preprocessing selesai"
+          echo "✓ Preprocessing selesai"
 
+      # 8. Memvalidasi output yang dihasilkan oleh preprocessing
       - name: Validate Output
         working-directory: preprocessing
         run: |
           python -c "
-          import os, pandas as pd
+          import os, sys, pandas as pd
 
-          out = 'ulasan-aplikasi-dana_preprocessing'
-          files = ['X_train.csv', 'X_val.csv', 'X_test.csv', 'y_train.csv', 'y_val.csv', 'y_test.csv']
+          # Cek beberapa kemungkinan lokasi output
+          possible_paths = [
+              'ulasan-aplikasi-dana_preprocessing',
+              '../preprocessing/ulasan-aplikasi-dana_preprocessing',
+          ]
+          
+          out = None
+          for path in possible_paths:
+              if os.path.exists(path):
+                  out = path
+                  break
+          
+          if out is None:
+              print('✗ Output directory tidak ditemukan')
+              sys.exit(1)
+          
+          print(f'✓ Output directory: {out}')
+          
+          files = ['X_train.csv', 'X_val.csv', 'X_test.csv', 
+                   'y_train.csv', 'y_val.csv', 'y_test.csv',
+                   'data_preprocessed.csv', 'metadata.json']
 
           print('Validasi output:')
           for f in files:
               path = os.path.join(out, f)
-              assert os.path.exists(path), f'Tidak ada: {path}'
-              print(f'  File ditemukan: {f}')
+              if os.path.exists(path):
+                  size = os.path.getsize(path)
+                  print(f'  ✓ File ditemukan: {f} ({size:,} bytes)')
+              else:
+                  print(f'  ✗ File tidak ditemukan: {f}')
+                  sys.exit(1)
 
           train_x = pd.read_csv(f'{out}/X_train.csv')
           train_y = pd.read_csv(f'{out}/y_train.csv')
-          assert len(train_x) > 0
-          assert len(train_y) > 0
-          print(f'  Train size: {len(train_x)} baris')
-          print('Semua validasi berhasil')
+          
+          if len(train_x) == 0:
+              print('  ✗ X_train kosong')
+              sys.exit(1)
+          if len(train_y) == 0:
+              print('  ✗ y_train kosong')
+              sys.exit(1)
+          if len(train_x) != len(train_y):
+              print('  ✗ Jumlah X_train dan y_train tidak sama')
+              sys.exit(1)
+          
+          print(f'  ✓ Train size: {len(train_x)} baris')
+          print('✓ Semua validasi berhasil')
           "
 
+      # 9. Mengupload hasil preprocessing ke GitHub sebagai artifact
       - name: Upload Preprocessing Results
         uses: actions/upload-artifact@v4
         with:
-          name: preprocessing-results
-          path: preprocessing/ulasan-aplikasi-dana_preprocessing/
-          retention-days: 30
+          name: preprocessing-results               # Nama artifact
+          path: |
+            preprocessing/ulasan-aplikasi-dana_preprocessing/
+            ../preprocessing/ulasan-aplikasi-dana_preprocessing/
+          retention-days: 30                       # Masa penyimpanan 30 hari
+          if-no-files-found: warn
 
+      # 10. Ringkasan akhir job (selalu dijalankan, sukses atau gagal)
       - name: Complete job
         if: always()
         run: |
+          echo "----------------------------------------"
           echo "SUMMARY"
+          echo "----------------------------------------"
           echo "Status    : ${{ job.status }}"
           echo "Timestamp : $(date +'%Y-%m-%d %H:%M:%S')"
+          echo ""
+          echo "Output files:"
           if [ -d "preprocessing/ulasan-aplikasi-dana_preprocessing" ]; then
-            echo "Output files:"
             ls -lh preprocessing/ulasan-aplikasi-dana_preprocessing/
+          elif [ -d "../preprocessing/ulasan-aplikasi-dana_preprocessing" ]; then
+            ls -lh ../preprocessing/ulasan-aplikasi-dana_preprocessing/
+          else
+            echo "  ✗ Output directory tidak ditemukan"
           fi
